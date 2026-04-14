@@ -1,0 +1,28 @@
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import yfinance as yf
+import pandas as pd
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/api/stock')
+def get_stock():
+    symbol = request.args.get('symbol', 'AAPL')
+
+    df = yf.download(symbol, period="1mo")
+
+    data = []
+    for index, row in df.iterrows():
+        data.append({
+            "time": index.strftime('%Y-%m-%d'),
+            "open": float(row['Open']),
+            "high": float(row['High']),
+            "low": float(row['Low']),
+            "close": float(row['Close'])
+        })
+
+    return jsonify(data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
